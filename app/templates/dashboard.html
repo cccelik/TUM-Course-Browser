@@ -1,0 +1,135 @@
+{% extends "base.html" %}
+{% block title %}Dashboard | {{ program.name }}{% endblock %}
+{% block content %}
+<section class="section-heading">
+  <div>
+    <p class="eyebrow">{{ program.name }}</p>
+    <h1>Progress dashboard</h1>
+  </div>
+</section>
+
+<section class="card-grid">
+  {% for item in progress_items %}
+  {% if item.title == wahl_parent_title %}
+  {% set extra_bucket = wahl_dashboard.extra_bucket %}
+  {% set primary_areas = wahl_dashboard.primary_areas %}
+  {% set secondary_one_areas = wahl_dashboard.secondary_one_areas %}
+  {% set secondary_two_areas = wahl_dashboard.secondary_two_areas %}
+  <article class="category-card wahl-card clickable-card {{ 'fulfilled' if item.fulfilled else 'open' }}" data-href="/programs/{{ program.id }}/categories/{{ item.category_id }}">
+    <div class="card-header">
+      <div>
+        <h3>{{ item.title }}</h3>
+      </div>
+    </div>
+    <div class="progress-circle" style="--passed-progress: {{ item.progress_percent }};">
+      <div class="progress-inner">
+        <div class="credit-value">{{ item.passed_credits }}/{{ item.required_credits|round(0, 'floor')|int if item.required_credits is not none and item.required_credits.is_integer() else item.required_credits or 0 }}</div>
+        <div class="credit-label">Credits</div>
+      </div>
+    </div>
+    <p class="summary-line">{{ item.remaining_credits }} remaining{% if item.wanted_credits %}, {{ item.wanted_credits }} wanted{% endif %}</p>
+    <button type="button" class="details-toggle" data-toggle-wahl-details aria-expanded="false">
+      Show details
+    </button>
+    <div class="wahl-details" hidden>
+      {% set child_items = child_progress_by_parent.get(item.category_id, []) %}
+      {% if child_items %}
+      <div class="subrequirement-list">
+        {% for child in child_items %}
+        <a class="subrequirement-pill" href="/programs/{{ program.id }}/categories/{{ child.category_id }}">
+          <span>{{ child.title }}</span>
+          <strong>{{ child.passed_credits }}/{{ child.required_credits|int if child.required_credits is not none else 0 }}</strong>
+        </a>
+        {% endfor %}
+      </div>
+      {% endif %}
+      <div class="wahl-tabs">
+        <a class="wahl-tab {{ 'active' if selected_wahl_tab == 'primary' else '' }}" href="/programs/{{ program.id }}/dashboard?wahl_tab=primary">Primary</a>
+        <a class="wahl-tab {{ 'active' if selected_wahl_tab == 'secondary_1' else '' }}" href="/programs/{{ program.id }}/dashboard?wahl_tab=secondary_1">Secondary 1</a>
+        <a class="wahl-tab {{ 'active' if selected_wahl_tab == 'secondary_2' else '' }}" href="/programs/{{ program.id }}/dashboard?wahl_tab=secondary_2">Secondary 2</a>
+        <a class="wahl-tab {{ 'active' if selected_wahl_tab == 'extra' else '' }}" href="/programs/{{ program.id }}/dashboard?wahl_tab=extra">Extra {{ extra_bucket.required_credits|int }}</a>
+      </div>
+      <div class="mini-circle-grid">
+        {% if selected_wahl_tab == 'primary' %}
+          {% for area in primary_areas %}
+          <div class="mini-circle-card">
+            <div class="mini-circle" style="--passed-progress: {{ area.progress_percent }};">
+              <div class="mini-circle-inner">
+                <strong>{{ area.passed_credits }}/{{ area.required_credits|int }}</strong>
+              </div>
+            </div>
+            <div class="mini-circle-title">{{ area.name }}</div>
+          </div>
+          {% else %}
+          <p class="empty-state">No primary focus area selected yet.</p>
+          {% endfor %}
+        {% elif selected_wahl_tab == 'secondary_1' %}
+          {% for area in secondary_one_areas %}
+          <div class="mini-circle-card">
+            <div class="mini-circle" style="--passed-progress: {{ area.progress_percent }};">
+              <div class="mini-circle-inner">
+                <strong>{{ area.passed_credits }}/{{ area.required_credits|int }}</strong>
+              </div>
+            </div>
+            <div class="mini-circle-title">{{ area.name }}</div>
+          </div>
+          {% else %}
+          <p class="empty-state">No Secondary 1 focus area selected yet.</p>
+          {% endfor %}
+        {% elif selected_wahl_tab == 'secondary_2' %}
+          {% for area in secondary_two_areas %}
+          <div class="mini-circle-card">
+            <div class="mini-circle" style="--passed-progress: {{ area.progress_percent }};">
+              <div class="mini-circle-inner">
+                <strong>{{ area.passed_credits }}/{{ area.required_credits|int }}</strong>
+              </div>
+            </div>
+            <div class="mini-circle-title">{{ area.name }}</div>
+          </div>
+          {% else %}
+          <p class="empty-state">No Secondary 2 focus area selected yet.</p>
+          {% endfor %}
+        {% else %}
+        <div class="mini-circle-card wide">
+          <div class="mini-circle" style="--passed-progress: {{ extra_bucket.progress_percent }};">
+            <div class="mini-circle-inner">
+              <strong>{{ extra_bucket.passed_credits }}/{{ extra_bucket.required_credits|int }}</strong>
+            </div>
+          </div>
+          <div class="mini-circle-title">{{ extra_bucket.title }}</div>
+          <p class="muted">{{ extra_bucket.note }}</p>
+        </div>
+        {% endif %}
+      </div>
+    </div>
+  </article>
+  {% else %}
+  <a class="category-card {{ 'fulfilled' if item.fulfilled else 'open' }}" href="/programs/{{ program.id }}/categories/{{ item.category_id }}">
+    <div class="card-header">
+      <h3>{{ item.title }}</h3>
+    </div>
+    <div class="progress-circle" style="--passed-progress: {{ item.progress_percent }};">
+      <div class="progress-inner">
+        <div class="credit-value">{{ item.passed_credits }}/{{ item.required_credits|round(0, 'floor')|int if item.required_credits is not none and item.required_credits.is_integer() else item.required_credits or 0 }}</div>
+        <div class="credit-label">Credits</div>
+      </div>
+    </div>
+    <p class="summary-line">{{ item.remaining_credits }} remaining{% if item.wanted_credits %}, {{ item.wanted_credits }} wanted{% endif %}</p>
+    {% set child_items = child_progress_by_parent.get(item.category_id, []) %}
+    {% if child_items %}
+    <div class="subrequirement-list">
+      {% for child in child_items %}
+      <span class="subrequirement-pill">
+        <span>{{ child.title }}</span>
+        <strong>{{ child.passed_credits }}/{{ child.required_credits|int if child.required_credits is not none else 0 }}</strong>
+      </span>
+      {% endfor %}
+    </div>
+    {% endif %}
+  </a>
+  {% endif %}
+  {% else %}
+  <div class="empty-state">No requirement categories found for this program yet.</div>
+  {% endfor %}
+</section>
+{% endblock %}

@@ -1,0 +1,57 @@
+{% extends "base.html" %}
+{% block title %}Programs | Studiengang Planner{% endblock %}
+{% block content %}
+<section class="panel">
+  <div class="section-heading">
+    <div>
+      <p class="eyebrow">Import</p>
+      <h1>Degree programs</h1>
+    </div>
+  </div>
+
+  <form method="post" action="/programs" class="program-form">
+    <label>
+      Program name
+      <input type="text" name="name" required placeholder="M.Sc. Informatics">
+    </label>
+    <label>
+      Requirements URL
+      <input type="url" name="requirements_url" required placeholder="https://...">
+    </label>
+    <label>
+      Course tree URL
+      <input type="url" name="courses_url" required placeholder="https://...">
+    </label>
+    <button type="submit">Import program</button>
+  </form>
+</section>
+
+<section class="panel">
+  <div class="section-heading">
+    <div>
+      <p class="eyebrow">Local data</p>
+      <h2>Imported programs</h2>
+    </div>
+  </div>
+
+  {% if programs %}
+  <div class="program-list">
+    {% for program in programs %}
+    <article class="program-card">
+      <div>
+        <h3>{{ program.name }}</h3>
+        <p>{{ program.requirements_url }}</p>
+        <p>{{ program.courses_url }}</p>
+      </div>
+      <div class="program-actions">
+        <a href="/programs/{{ program.id }}/dashboard" class="button-link">Open dashboard</a>
+        <a href="/programs/{{ program.id }}/courses" class="button-link secondary">Browse courses</a>
+      </div>
+    </article>
+    {% endfor %}
+  </div>
+  {% else %}
+  <p class="empty-state">No degree programs imported yet.</p>
+  {% endif %}
+</section>
+{% endblock %}

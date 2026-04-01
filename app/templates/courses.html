@@ -1,0 +1,124 @@
+{% extends "base.html" %}
+{% block title %}Courses | {{ program.name }}{% endblock %}
+{% block content %}
+<section class="section-heading">
+  <div>
+    <p class="eyebrow">{{ program.name }}</p>
+    <h1>Course browser</h1>
+  </div>
+</section>
+
+<section class="panel">
+  <form method="get" class="filters">
+    <label>
+      Search
+      <input type="text" name="search" value="{{ search }}" placeholder="Logic, IN1234, Theorie">
+    </label>
+    <label>
+      State
+      <select name="filter_state">
+        <option value="all" {% if filter_state == 'all' %}selected{% endif %}>All courses</option>
+        <option value="wanted" {% if filter_state == 'wanted' %}selected{% endif %}>Wanted only</option>
+        <option value="passed" {% if filter_state == 'passed' %}selected{% endif %}>Passed only</option>
+        <option value="unassigned" {% if filter_state == 'unassigned' %}selected{% endif %}>Unassigned only</option>
+      </select>
+    </label>
+    <label>
+      Category
+      <select name="category_id">
+        <option value="">All categories</option>
+        {% for category in categories %}
+        <option value="{{ category.id }}" {% if selected_category_id == category.id %}selected{% endif %}>{{ category.title }}</option>
+        {% endfor %}
+      </select>
+    </label>
+    <label>
+      Wahl focus area
+      <select name="focus_area">
+        <option value="">All focus areas</option>
+        {% for area in focus_areas %}
+        <option value="{{ area.name }}" {% if selected_focus_area == area.name %}selected{% endif %}>{{ area.name }}</option>
+        {% endfor %}
+      </select>
+    </label>
+    <label>
+      Semester
+      <select name="semester">
+        <option value="">All semesters</option>
+        <option value="Summer" {% if selected_semester == 'Summer' %}selected{% endif %}>Summer</option>
+        <option value="Winter" {% if selected_semester == 'Winter' %}selected{% endif %}>Winter</option>
+        <option value="Summer and winter" {% if selected_semester == 'Summer and winter' %}selected{% endif %}>Summer and winter</option>
+        <option value="unknown" {% if selected_semester == 'unknown' %}selected{% endif %}>Unknown</option>
+      </select>
+    </label>
+    <button type="submit">Search</button>
+  </form>
+</section>
+
+<section class="panel table-panel">
+  <table>
+    <thead>
+      <tr>
+        <th>Title</th>
+        <th>Credits</th>
+        <th>Semester</th>
+        <th>Path</th>
+        <th>Assigned category</th>
+        <th>Wanted</th>
+        <th>Passed</th>
+        <th>Reassign</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for course in courses %}
+      {% set state = course.user_state %}
+      {% set assignment = course.assignments[0] if course.assignments else None %}
+      <tr>
+        <td>
+          <strong>{{ course.title }}</strong>
+          {% if course.code %}<div class="muted">{{ course.code }}</div>{% endif %}
+        </td>
+        <td>{{ course.credits or '—' }}</td>
+        <td>{{ course.semester_offering or '—' }}</td>
+        <td class="path-cell">{{ course.raw_path or '—' }}</td>
+        <td>
+          {{ assignment.requirement_category.title if assignment else 'Unassigned' }}
+          {% if assignment and assignment.requirement_category.title == 'Theorie' and theory_focus_areas.get(course.id) %}
+          <div class="muted">{{ theory_focus_areas.get(course.id) }}</div>
+          {% endif %}
+          {% if selected_focus_area or ('Wahlmodulkatalog Informatik' in (course.raw_path or '')) %}
+          <div class="muted">{{ course.raw_path.split('>')[2].strip() if course.raw_path and 'Wahlmodulkatalog Informatik' in course.raw_path and course.raw_path.split('>')|length > 2 else '—' }}</div>
+          {% endif %}
+        </td>
+        <td>
+          <form method="post" action="/programs/{{ program.id }}/courses/{{ course.id }}/toggle-wanted">
+            <input type="hidden" name="next_url" value="{{ request.url }}">
+            <button type="submit" class="table-button {{ 'active' if state and state.wanted else '' }}">{{ 'Wanted' if state and state.wanted else 'Mark' }}</button>
+          </form>
+        </td>
+        <td>
+          <form method="post" action="/programs/{{ program.id }}/courses/{{ course.id }}/toggle-passed">
+            <input type="hidden" name="next_url" value="{{ request.url }}">
+            <button type="submit" class="table-button {{ 'active' if state and state.passed else '' }}">{{ 'Passed' if state and state.passed else 'Mark' }}</button>
+          </form>
+        </td>
+        <td>
+          <form method="post" action="/programs/{{ program.id }}/courses/{{ course.id }}/assign-category" class="inline-form auto-submit-form">
+            <input type="hidden" name="next_url" value="{{ request.url }}">
+            <select name="requirement_category_id">
+              {% for category in categories %}
+              <option value="{{ category.id }}" {% if assignment and assignment.requirement_category_id == category.id %}selected{% endif %}>{{ category.title }}</option>
+              {% endfor %}
+            </select>
+          </form>
+        </td>
+      </tr>
+      {% else %}
+      <tr>
+        <td colspan="8" class="empty-state">No courses match the selected filters.</td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</section>
+{% endblock %}

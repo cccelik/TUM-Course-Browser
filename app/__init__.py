@@ -1,0 +1,1 @@
+"""Studiengang planner package."""
