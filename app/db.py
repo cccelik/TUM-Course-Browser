@@ -5,6 +5,8 @@ from pathlib import Path
 from sqlalchemy import create_engine, event, text
 from sqlalchemy.orm import Session, declarative_base, sessionmaker
 
+from app.config import resolve_repo_path
+
 
 Base = declarative_base()
 
@@ -14,7 +16,7 @@ _initialized_paths: set[str] = set()
 
 
 def _sqlite_url(db_path: str | Path) -> str:
-    return f"sqlite:///{Path(db_path).resolve().as_posix()}"
+    return f"sqlite:///{resolve_repo_path(db_path).resolve().as_posix()}"
 
 
 def _set_sqlite_pragmas(dbapi_connection, connection_record):
@@ -27,7 +29,7 @@ def _set_sqlite_pragmas(dbapi_connection, connection_record):
 
 
 def get_engine(db_path: str | Path):
-    key = str(Path(db_path).resolve())
+    key = str(resolve_repo_path(db_path).resolve())
     engine = _engines.get(key)
     if engine is not None:
         return engine
@@ -46,13 +48,13 @@ def get_engine(db_path: str | Path):
 
 
 def get_session(db_path: str | Path) -> Session:
-    key = str(Path(db_path).resolve())
+    key = str(resolve_repo_path(db_path).resolve())
     get_engine(key)
     return _sessionmakers[key]()
 
 
 def initialize_program_database(db_path: str | Path) -> None:
-    key = str(Path(db_path).resolve())
+    key = str(resolve_repo_path(db_path).resolve())
     if key in _initialized_paths:
         return
     engine = get_engine(key)

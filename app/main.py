@@ -1,5 +1,7 @@
 from __future__ import annotations
 
+from pathlib import Path
+
 from fastapi import FastAPI
 from fastapi.staticfiles import StaticFiles
 
@@ -11,7 +13,8 @@ from app.storage_setup import initialize_storage
 initialize_storage()
 
 app = FastAPI(title=APP_TITLE)
-app.mount("/static", StaticFiles(directory="app/static"), name="static")
+APP_DIR = Path(__file__).resolve().parent
+app.mount("/static", StaticFiles(directory=APP_DIR / "static"), name="static")
 
 
 @app.get("/healthz")

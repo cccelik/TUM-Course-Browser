@@ -190,9 +190,9 @@ Filters are designed to apply immediately for dropdown changes. Search remains e
 The app now uses:
 
 - one small registry database:
-  [data/program_registry.db](/Users/celikyucel/Desktop/Scripts/TUM-Course-Browser/data/program_registry.db)
+  [`data/program_registry.db`](data/program_registry.db)
 - one SQLite database per imported program in `data/`, for example:
-  [data/program_001_m-sc-informatik.db](/Users/celikyucel/Desktop/Scripts/TUM-Course-Browser/data/program_001_m-sc-informatik.db)
+  [`data/program_001_m-sc-informatik.db`](data/program_001_m-sc-informatik.db)
 
 This means imported programs are no longer combined into one shared content database.
 
@@ -213,7 +213,7 @@ Each program DB stores:
 - requirement-option selections
 
 Legacy note:
-- if an old combined database exists at [data/studiengang_planner.db](/Users/celikyucel/Desktop/Scripts/TUM-Course-Browser/data/studiengang_planner.db), startup will split its programs into separate program DB files and register them automatically
+- if an old combined database exists at [`data/studiengang_planner.db`](data/studiengang_planner.db), startup will split its programs into separate program DB files and register them automatically
 
 ## Core Data Model
 
@@ -464,6 +464,6 @@ Reload the page, and if needed restart the app process. Template and JS changes 
 ## License / Assets
 
 The TUM logo SVG used in the top bar is stored in:
-- [app/static/tum-logo.svg](/Users/celikyucel/Desktop/Scripts/TUM-Course-Browser/app/static/tum-logo.svg)
+- [`app/static/tum-logo.svg`](app/static/tum-logo.svg)
 
 Make sure you use that asset in a way that is appropriate for your local/project context.
